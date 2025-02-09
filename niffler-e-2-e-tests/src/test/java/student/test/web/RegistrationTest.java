@@ -7,6 +7,8 @@ import student.jupiter.annotaion.meta.WebTest;
 import student.pages.LoginPage;
 import student.util.DataGenerator;
 
+import static student.util.DataGenerator.userPassword;
+
 @WebTest
 public class RegistrationTest {
 
@@ -18,14 +20,14 @@ public class RegistrationTest {
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .clickRegisterButton()
-                .setUserName(user.name())
-                .setPassword(user.password())
-                .setPasswordSubmit(user.password())
+                .setUserName(user.username())
+                .setPassword(userPassword)
+                .setPasswordSubmit(userPassword)
                 .clickSubmitButton()
                 .verifySuccessfulRegistration()
                 .clickLoginButton()
-                .setUserName(user.name())
-                .setPassword(user.password())
+                .setUserName(user.username())
+                .setPassword(userPassword)
                 .clickSubmitButton()
                 .verifyTitleMainPage();
     }
@@ -36,17 +38,17 @@ public class RegistrationTest {
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .clickRegisterButton()
-                .setUserName(user.name())
-                .setPassword(user.password())
-                .setPasswordSubmit(user.password())
+                .setUserName(user.username())
+                .setPassword(userPassword)
+                .setPasswordSubmit(userPassword)
                 .clickSubmitButton()
                 .verifySuccessfulRegistration()
                 .clickLoginButton()
                 .clickRegisterButton()
-                .setUserName(user.name())
-                .setPassword(user.password())
-                .setPasswordSubmit(user.password())
-                .verifyErrorAlreadyExistsUserMessage(user.name());
+                .setUserName(user.username())
+                .setPassword(userPassword)
+                .setPasswordSubmit(userPassword)
+                .verifyErrorAlreadyExistsUserMessage(user.username());
     }
 
     @Test
@@ -55,9 +57,9 @@ public class RegistrationTest {
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .clickRegisterButton()
-                .setUserName(user.name())
-                .setPassword(user.password())
-                .setPasswordSubmit(user.name())
+                .setUserName(user.username())
+                .setPassword(userPassword)
+                .setPasswordSubmit(user.username())
                 .verifyErrorPasswordNotEqualMessage();
     }
 
@@ -67,14 +69,14 @@ public class RegistrationTest {
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .clickRegisterButton()
-                .setUserName(user.name())
-                .setPassword(user.password())
-                .setPasswordSubmit(user.password())
+                .setUserName(user.username())
+                .setPassword(userPassword)
+                .setPasswordSubmit(userPassword)
                 .clickSubmitButton()
                 .verifySuccessfulRegistration()
                 .clickLoginButton()
-                .setUserName(user.name())
-                .setPassword(user.password())
+                .setUserName(user.username())
+                .setPassword(userPassword)
                 .clickSubmitButton()
                 .verifyTitleMainPage();
     }
@@ -85,14 +87,14 @@ public class RegistrationTest {
 
         Selenide.open(CFG.frontUrl(), LoginPage.class)
                 .clickRegisterButton()
-                .setUserName(user.name())
-                .setPassword(user.password())
-                .setPasswordSubmit(user.password())
+                .setUserName(user.username())
+                .setPassword(userPassword)
+                .setPasswordSubmit(userPassword)
                 .clickSubmitButton()
                 .verifySuccessfulRegistration()
                 .clickLoginButton()
-                .setUserName(user.name())
-                .setPassword(user.name())
+                .setUserName(user.username())
+                .setPassword(user.username())
                 .verifyErrorCredentialsMessage()
                 .verifyLoginPage();
     }

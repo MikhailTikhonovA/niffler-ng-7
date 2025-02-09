@@ -5,13 +5,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import student.config.Config;
 import student.data.dao.AuthDao;
 import student.data.entity.auth.AuthUserEntity;
+import student.data.mapper.AuthUserEntityRowMapper;
 
 import java.sql.*;
+import java.util.Optional;
 import java.util.UUID;
 
 public class AuthDaoJdbc implements AuthDao {
 
-    private static final PasswordEncoder pe = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    private static final PasswordEncoder PASSWORD_ENCODER = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
     private static final Config CFG = Config.getInstance();
 
@@ -29,7 +31,7 @@ public class AuthDaoJdbc implements AuthDao {
                 Statement.RETURN_GENERATED_KEYS
         )) {
             preparedStatement.setString(1, user.getUsername());
-            preparedStatement.setString(2, pe.encode(user.getPassword()));
+            preparedStatement.setString(2, PASSWORD_ENCODER.encode(user.getPassword()));
             preparedStatement.setBoolean(3, user.getEnabled());
             preparedStatement.setBoolean(4, user.getAccountNonExpired());
             preparedStatement.setBoolean(5, user.getAccountNonLocked());
@@ -52,13 +54,31 @@ public class AuthDaoJdbc implements AuthDao {
     }
 
     @Override
+    public Optional<AuthUserEntity> findById(UUID id) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM \"user\" WHERE id = ?")) {
+            ps.setObject(1, id);
+            ps.execute();
+            try (ResultSet rs = ps.getResultSet()) {
+                if (rs.next()) {
+                    return Optional.ofNullable(
+                            AuthUserEntityRowMapper.instance.mapRow(rs, rs.getRow())
+                    );
+                } else {
+                    return Optional.empty();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void deleteUser(AuthUserEntity user) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 "delete from public.\"user\" where id = ?"
         )) {
             preparedStatement.setObject(1, user.getId());
-            var result = preparedStatement.execute();
-            System.out.println("delete from public.\"user\" = " + result + " " + user.getId());
+            preparedStatement.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

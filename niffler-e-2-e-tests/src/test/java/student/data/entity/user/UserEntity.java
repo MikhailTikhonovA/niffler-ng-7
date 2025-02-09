@@ -6,6 +6,7 @@ import student.model.CurrencyValues;
 import student.model.UserJson;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Getter
@@ -29,8 +30,15 @@ public class UserEntity implements Serializable {
     private byte[] photoSmall;
 
     public static UserEntity fromJson(UserJson json) {
-        UserEntity user = new UserEntity();
-        user.username = json.name();
-        return user;
+        UserEntity ue = new UserEntity();
+        ue.setId(json.id());
+        ue.setUsername(json.username());
+        ue.setCurrency(json.currency());
+        ue.setFirstname(json.firstname());
+        ue.setSurname(json.surname());
+        ue.setFullname(json.fullname());
+        ue.setPhoto(json.photo() != null ? json.photo().getBytes(StandardCharsets.UTF_8) : null);
+        ue.setPhotoSmall(json.photoSmall() != null ? json.photoSmall().getBytes(StandardCharsets.UTF_8) : null);
+        return ue;
     }
 }
