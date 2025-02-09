@@ -1,22 +1,30 @@
 package student.service;
 
 
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import student.config.Config;
 import student.data.Databases;
-import student.data.dao.impl.CategoryDaoJdbc;
-import student.data.dao.impl.SpendDaoJdbc;
+import student.data.dao.impl.*;
+import student.data.entity.auth.AuthUserEntity;
+import student.data.entity.auth.Authority;
+import student.data.entity.auth.AuthorityEntity;
 import student.data.entity.spend.CategoryEntity;
 import student.data.entity.spend.SpendEntity;
+import student.data.entity.user.UserEntity;
 import student.model.CategoryJson;
 import student.model.SpendJson;
+import student.model.UserJson;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class SpendDbClient {
+import static student.data.Databases.dataSource;
 
+public class SpendDbClient {
     private static final Config CFG = Config.getInstance();
 
     public SpendJson createSpend(SpendJson spend) throws SQLException {
@@ -77,13 +85,6 @@ public class SpendDbClient {
         return Databases.transaction(connection -> {
             var jdbc = new SpendDaoJdbc(connection);
             return jdbc.findSpendById(id);
-        }, CFG.spendJdbcUrl(), null);
-    }
-
-    public List<CategoryEntity> findCategoryByUsername(String username) throws SQLException {
-        return Databases.transaction(connection -> {
-            var jdbc = new CategoryDaoJdbc(connection);
-            return jdbc.findCategoriesByUsername(username);
         }, CFG.spendJdbcUrl(), null);
     }
 

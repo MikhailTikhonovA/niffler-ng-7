@@ -116,6 +116,35 @@ public class SpendDaoJdbc implements SpendDao {
     }
 
     @Override
+    public List<SpendEntity> findAll() {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(
+                "select * from spend",
+                Statement.RETURN_GENERATED_KEYS
+        )) {
+            preparedStatement.execute();
+            try (ResultSet resultSet = preparedStatement.getResultSet()) {
+                List<SpendEntity> spendEntities = new ArrayList<>();
+                while (resultSet.next()) {
+                    SpendEntity spendEntity = new SpendEntity();
+                    CategoryEntity categoryEntity = new CategoryEntity();
+                    categoryEntity.setId(resultSet.getObject("category_id", UUID.class));
+                    spendEntity.setId(resultSet.getObject("id", UUID.class));
+                    spendEntity.setUsername(resultSet.getString("username"));
+                    spendEntity.setCurrency(CurrencyValues.valueOf(resultSet.getString("currency")));
+                    spendEntity.setSpendDate(resultSet.getDate("spend_date"));
+                    spendEntity.setAmount(resultSet.getDouble("amount"));
+                    spendEntity.setDescription(resultSet.getString("description"));
+                    spendEntity.setCategory(categoryEntity);
+                    spendEntities.add(spendEntity);
+                }
+                return spendEntities;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void deleteSpendById(SpendEntity spendEntity) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 "delete from spend where id = ?"

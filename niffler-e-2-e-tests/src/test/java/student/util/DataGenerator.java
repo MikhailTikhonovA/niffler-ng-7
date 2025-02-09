@@ -1,9 +1,11 @@
 package student.util;
 
 import com.github.javafaker.Faker;
+import student.model.CurrencyValues;
 import student.model.UserJson;
 
 import java.util.Locale;
+import java.util.UUID;
 
 public class DataGenerator {
 
@@ -15,6 +17,14 @@ public class DataGenerator {
 
 
     public static UserJson getUser() {
-        return new UserJson(faker.name().username(), faker.internet().password().substring(1, 7));
+        return new UserJson(UUID.randomUUID(),
+                faker.name().username(),
+                faker.name().name(),
+                faker.name().lastName(),
+                faker.name().fullName(),
+                CurrencyValues.RUB,
+                null,
+                null,
+                null);
     }
 }
