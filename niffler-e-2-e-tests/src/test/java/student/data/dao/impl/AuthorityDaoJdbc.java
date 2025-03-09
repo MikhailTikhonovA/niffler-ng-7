@@ -17,26 +17,19 @@ public class AuthorityDaoJdbc implements AuthorityDao {
     }
 
     @Override
-    public AuthorityEntity createUser(AuthorityEntity authorityEntity) {
+    public void createAuthority(AuthorityEntity... authorityEntity) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 "INSERT INTO authority (user_id, authority)"
                         + "VALUES (?,?)",
                 Statement.RETURN_GENERATED_KEYS
         )) {
-            preparedStatement.setObject(1, authorityEntity.getUser());
-            preparedStatement.setObject(2, authorityEntity.getAuthority().toString());
-
-            preparedStatement.executeUpdate();
-            final UUID generatedKey;
-            try (ResultSet resultSet = preparedStatement.getGeneratedKeys()) {
-                if (resultSet.next()) {
-                    generatedKey = resultSet.getObject("id", UUID.class);
-                } else {
-                    throw new SQLException("Cant find id in RS");
-                }
+            for (AuthorityEntity authority : authorityEntity) {
+                preparedStatement.setObject(1, authority.getUser());
+                preparedStatement.setObject(2, authority.getAuthority().toString());
+                preparedStatement.addBatch();
+                preparedStatement.clearParameters();
             }
-            authorityEntity.setId(generatedKey);
-            return authorityEntity;
+            preparedStatement.executeBatch();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

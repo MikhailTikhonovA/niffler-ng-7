@@ -19,7 +19,6 @@ import java.util.function.Function;
 public class Databases {
     private Databases() {
     }
-
     private static final Map<String, DataSource> DATASOURCE = new ConcurrentHashMap<>();
     private static final Map<Long, Map<String, Connection>> THREAD_CONNECTION = new ConcurrentHashMap<>();
 
@@ -121,7 +120,7 @@ public class Databases {
         }
     }
 
-    private static DataSource dataSource(String jdbcUrl) {
+    public static DataSource dataSource(String jdbcUrl) {
         return DATASOURCE.computeIfAbsent(
                 jdbcUrl,
                 key -> {
