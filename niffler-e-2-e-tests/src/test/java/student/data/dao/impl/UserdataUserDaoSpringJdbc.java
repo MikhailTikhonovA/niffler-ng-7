@@ -3,9 +3,11 @@ package student.data.dao.impl;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import student.config.Config;
 import student.data.dao.UserdataDao;
 import student.data.entity.user.UserEntity;
 import student.data.mapper.UserdataUserEntityRowMapper;
+import student.data.tmpl.Datasources;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
@@ -15,15 +17,11 @@ import java.util.UUID;
 
 public class UserdataUserDaoSpringJdbc implements UserdataDao {
 
-    private final DataSource datasource;
-
-    public UserdataUserDaoSpringJdbc(DataSource datasource) {
-        this.datasource = datasource;
-    }
+    private static final Config CFG = Config.getInstance();
 
     @Override
     public UserEntity createUser(UserEntity userEntity) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(Datasources.dataSource(CFG.userdataJdbcUrl()));
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO \"user\" (username, currency, firstname, surname, photo, photo_small, full_name) " + "VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
@@ -43,19 +41,19 @@ public class UserdataUserDaoSpringJdbc implements UserdataDao {
 
     @Override
     public Optional<UserEntity> findUserById(UUID id) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(Datasources.dataSource(CFG.userdataJdbcUrl()));
         return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM \"user\" WHERE id = ?", UserdataUserEntityRowMapper.instance, id));
     }
 
     @Override
     public Optional<UserEntity> findUserByUsername(String username) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(Datasources.dataSource(CFG.userdataJdbcUrl()));
         return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM \"user\" WHERE name = ?", UserdataUserEntityRowMapper.instance, username));
     }
 
     @Override
     public void deleteUser(UserEntity userEntity) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(Datasources.dataSource(CFG.userdataJdbcUrl()));
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "DELETE FROM \"user\" WHERE id = ?");

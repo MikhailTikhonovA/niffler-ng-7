@@ -3,9 +3,11 @@ package student.data.dao.impl;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import student.config.Config;
 import student.data.dao.AuthorityDao;
 import student.data.entity.auth.AuthUserEntity;
 import student.data.entity.auth.AuthorityEntity;
+import student.data.tmpl.Datasources;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
@@ -13,15 +15,11 @@ import java.sql.SQLException;
 
 public class AuthorityDaoSpringJdbc implements AuthorityDao {
 
-    private final DataSource datasource;
-
-    public AuthorityDaoSpringJdbc(DataSource datasource) {
-        this.datasource = datasource;
-    }
+    private static final Config CFG = Config.getInstance();
 
     @Override
     public void createAuthority(AuthorityEntity... authorityEntity) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(Datasources.dataSource(CFG.authJdbcUrl()));
         jdbcTemplate.batchUpdate(
                 "INSERT INTO authority (user_id, authority)"
                         + "VALUES (?,?)",
@@ -42,7 +40,7 @@ public class AuthorityDaoSpringJdbc implements AuthorityDao {
 
     @Override
     public void deleteUser(AuthUserEntity authUserEntity) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(Datasources.dataSource(CFG.authJdbcUrl()));
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "delete from authority where user_id = ?");

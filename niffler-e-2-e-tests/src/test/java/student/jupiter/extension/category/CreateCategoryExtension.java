@@ -32,7 +32,7 @@ public class CreateCategoryExtension implements BeforeEachCallback, ParameterRes
                         CategoryJson createCategory;
                         try {
                             createCategory = spendDbClient.createCategory(categoryJson);
-                        } catch (SQLException e) {
+                        } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
                         context.getStore(NAMESPACE).put(context.getUniqueId(), createCategory);
@@ -51,7 +51,7 @@ public class CreateCategoryExtension implements BeforeEachCallback, ParameterRes
     }
 
     @Override
-    public void afterTestExecution(ExtensionContext context) throws SQLException {
+    public void afterTestExecution(ExtensionContext context) throws Exception {
         CategoryJson categoryJson = context.getStore(NAMESPACE).get(context.getUniqueId(), CategoryJson.class);
         if (categoryJson != null) {
             CategoryJson category = new CategoryJson(

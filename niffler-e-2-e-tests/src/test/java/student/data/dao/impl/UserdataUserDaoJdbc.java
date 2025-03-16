@@ -9,19 +9,14 @@ import java.sql.*;
 import java.util.Optional;
 import java.util.UUID;
 
+import static student.data.tmpl.Connections.holder;
+
 public class UserdataUserDaoJdbc implements UserdataDao {
 
     private static final Config CFG = Config.getInstance();
-
-    private final Connection connection;
-
-    public UserdataUserDaoJdbc(Connection connection) {
-        this.connection = connection;
-    }
-
     @Override
     public UserEntity createUser(UserEntity userEntity) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
                 "INSERT INTO user (username, currency, firstname, surname, photo, photo_small, full_name) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
@@ -52,7 +47,7 @@ public class UserdataUserDaoJdbc implements UserdataDao {
 
     @Override
     public Optional<UserEntity> findUserById(UUID id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement =  holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
                 "SELECT * FROM user WHERE id = ?"
         )) {
             preparedStatement.setObject(1, id);
@@ -81,7 +76,7 @@ public class UserdataUserDaoJdbc implements UserdataDao {
 
     @Override
     public Optional<UserEntity> findUserByUsername(String username) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement =  holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
                 "SELECT * FROM user WHERE username = ?"
         )) {
             preparedStatement.setObject(1, username);
@@ -110,7 +105,7 @@ public class UserdataUserDaoJdbc implements UserdataDao {
 
     @Override
     public void deleteUser(UserEntity userEntity) {
-        try (PreparedStatement ps = connection.prepareStatement(
+        try (PreparedStatement ps =  holder(CFG.userdataJdbcUrl()).connection().prepareStatement(
                 "DELETE FROM user WHERE id = ?"
         )) {
             ps.setObject(1, userEntity.getId());

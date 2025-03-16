@@ -5,20 +5,20 @@ import student.data.dao.AuthorityDao;
 import student.data.entity.auth.AuthUserEntity;
 import student.data.entity.auth.AuthorityEntity;
 
-import java.sql.*;
-import java.util.UUID;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import static student.data.tmpl.Connections.holder;
 
 public class AuthorityDaoJdbc implements AuthorityDao {
 
-    private final Connection connection;
-
-    public AuthorityDaoJdbc(Connection connection) {
-        this.connection = connection;
-    }
+    private static final Config CFG = Config.getInstance();
 
     @Override
     public void createAuthority(AuthorityEntity... authorityEntity) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.authJdbcUrl()).connection().prepareStatement(
                 "INSERT INTO authority (user_id, authority)"
                         + "VALUES (?,?)",
                 Statement.RETURN_GENERATED_KEYS
@@ -37,7 +37,7 @@ public class AuthorityDaoJdbc implements AuthorityDao {
 
     @Override
     public void deleteUser(AuthUserEntity authUserEntity) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.authJdbcUrl()).connection().prepareStatement(
                 "delete from authority where user_id = ?"
         )) {
             preparedStatement.setObject(1, authUserEntity.getId());
