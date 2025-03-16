@@ -12,20 +12,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static student.data.tmpl.Connections.holder;
+
 public class SpendDaoJdbc implements SpendDao {
 
     private static final Config CFG = Config.getInstance();
 
-    private final Connection connection;
-
-    public SpendDaoJdbc(Connection connection) {
-        this.connection = connection;
-    }
-
-
     @Override
     public SpendEntity createSpend(SpendEntity spendEntity) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "INSERT INTO spend (username, spend_date, currency, amount, description, category_id)"
                         + "VALUES (?,?,?,?,?,?)",
                 Statement.RETURN_GENERATED_KEYS
@@ -55,7 +50,7 @@ public class SpendDaoJdbc implements SpendDao {
 
     @Override
     public Optional<SpendEntity> findSpendById(UUID id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "select * from spend where id = ?",
                 Statement.RETURN_GENERATED_KEYS
         )) {
@@ -87,7 +82,7 @@ public class SpendDaoJdbc implements SpendDao {
 
     @Override
     public List<SpendEntity> findSpendsByUsername(String username) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "select * from spend where username = ?",
                 Statement.RETURN_GENERATED_KEYS
         )) {
@@ -117,7 +112,7 @@ public class SpendDaoJdbc implements SpendDao {
 
     @Override
     public List<SpendEntity> findAll() {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "select * from spend",
                 Statement.RETURN_GENERATED_KEYS
         )) {
@@ -146,7 +141,7 @@ public class SpendDaoJdbc implements SpendDao {
 
     @Override
     public void deleteSpendById(SpendEntity spendEntity) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "delete from spend where id = ?"
         )) {
             preparedStatement.setObject(1, spendEntity.getId());
@@ -158,7 +153,7 @@ public class SpendDaoJdbc implements SpendDao {
 
     @Override
     public void deleteSpendByCategoryId(UUID id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "delete from spend where category_id = ?"
         )) {
             preparedStatement.setObject(1, id);

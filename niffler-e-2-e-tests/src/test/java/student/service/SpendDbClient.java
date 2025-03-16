@@ -1,36 +1,35 @@
 package student.service;
 
 
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import student.config.Config;
-import student.data.Databases;
-import student.data.dao.impl.*;
-import student.data.entity.auth.AuthUserEntity;
-import student.data.entity.auth.Authority;
-import student.data.entity.auth.AuthorityEntity;
+import student.data.dao.CategoryDao;
+import student.data.dao.SpendDao;
+import student.data.dao.impl.CategoryDaoJdbc;
+import student.data.dao.impl.SpendDaoJdbc;
 import student.data.entity.spend.CategoryEntity;
 import student.data.entity.spend.SpendEntity;
-import student.data.entity.user.UserEntity;
+import student.data.tmpl.JdbcTransactionTemplate;
 import student.model.CategoryJson;
 import student.model.SpendJson;
-import student.model.UserJson;
 
-import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static student.data.Databases.dataSource;
-
 public class SpendDbClient {
     private static final Config CFG = Config.getInstance();
 
-    public SpendJson createSpend(SpendJson spend) throws SQLException {
-        return Databases.transaction(connection -> {
+    private final CategoryDao categoryDao = new CategoryDaoJdbc();
+    private final SpendDao spendDao = new SpendDaoJdbc();
+
+    private final JdbcTransactionTemplate jdbcTransactionTemplate = new JdbcTransactionTemplate(
+            CFG.spendJdbcUrl()
+    );
+
+    public SpendJson createSpend(SpendJson spend) throws Exception {
+        return jdbcTransactionTemplate.execute(() -> {
             SpendEntity spendEntity = SpendEntity.fromJson(spend);
-            var jdbc = new CategoryDaoJdbc(connection);
+            var jdbc = categoryDao;
             var userCategories = jdbc.findCategoryByUsernameAndCategoryName(spend.username(), spend.category().name());
             if (userCategories.isEmpty()) {
                 CategoryEntity categoryEntity = jdbc.createCategory(spendEntity.getCategory());
@@ -39,66 +38,69 @@ public class SpendDbClient {
                 spendEntity.setCategory(userCategories.stream().findFirst().get());
             }
             return SpendJson.fromEntity(
-                    new SpendDaoJdbc(connection).createSpend(spendEntity));
-        }, CFG.spendJdbcUrl(), null);
+                    spendDao.createSpend(spendEntity));
+        });
     }
 
-    public CategoryJson createCategory(CategoryJson categoryJson) throws SQLException {
-        return Databases.transaction(connection -> {
-            var jdbc = new CategoryDaoJdbc(connection);
+    public CategoryJson createCategory(CategoryJson categoryJson) throws Exception {
+        return jdbcTransactionTemplate.execute(() -> {
+            var jdbc = categoryDao;
             CategoryEntity categoryEntity = CategoryEntity.fromJson(categoryJson);
             return CategoryJson.fromEntity(jdbc.createCategory(categoryEntity));
-        }, CFG.spendJdbcUrl(), null);
+        });
     }
 
-    public void deleteSpend(SpendJson spendingJson) throws SQLException {
-        Databases.transaction(connection -> {
-            var jdbc = new SpendDaoJdbc(connection);
+    public void deleteSpend(SpendJson spendingJson) throws Exception {
+        jdbcTransactionTemplate.execute(() -> {
+            var jdbc = spendDao;
             SpendEntity spendEntity = SpendEntity.fromJson(spendingJson);
             jdbc.deleteSpendById(spendEntity);
-        }, CFG.spendJdbcUrl(), null);
+            return null;
+        });
     }
 
-    public void deleteSpendByCategoryId(UUID id) throws SQLException {
-        Databases.transaction(connection -> {
-            var jdbc = new SpendDaoJdbc(connection);
+    public void deleteSpendByCategoryId(UUID id) throws Exception {
+        jdbcTransactionTemplate.execute(() -> {
+            var jdbc = spendDao;
             jdbc.deleteSpendByCategoryId(id);
-        }, CFG.spendJdbcUrl(), null);
+            return null;
+        });
     }
 
-    public void deleteCategory(CategoryJson categoryJson) throws SQLException {
-        Databases.transaction(connection -> {
-            var jdbc = new CategoryDaoJdbc(connection);
+    public void deleteCategory(CategoryJson categoryJson) throws Exception {
+        jdbcTransactionTemplate.execute(() -> {
+            var jdbc = categoryDao;
             CategoryEntity categoryEntity = CategoryEntity.fromJson(categoryJson);
             jdbc.deleteCategoryById(categoryEntity);
-        }, CFG.spendJdbcUrl(), null);
+            return null;
+        });
     }
 
-    public Optional<CategoryEntity> findCategoryById(UUID id) throws SQLException {
-        return Databases.transaction(connection -> {
-            var jdbc = new CategoryDaoJdbc(connection);
+    public Optional<CategoryEntity> findCategoryById(UUID id) throws Exception {
+        return jdbcTransactionTemplate.execute(() -> {
+            var jdbc = categoryDao;
             return jdbc.findByCategoryId(id);
-        }, CFG.spendJdbcUrl(), null);
+        });
     }
 
-    public Optional<SpendEntity> findSpendById(UUID id) throws SQLException {
-        return Databases.transaction(connection -> {
-            var jdbc = new SpendDaoJdbc(connection);
+    public Optional<SpendEntity> findSpendById(UUID id) throws Exception {
+        return jdbcTransactionTemplate.execute(() -> {
+            var jdbc = spendDao;
             return jdbc.findSpendById(id);
-        }, CFG.spendJdbcUrl(), null);
+        });
     }
 
-    public Optional<CategoryEntity> findCategoryByUsernameAndCategoryName(String username, String categoryName) throws SQLException {
-        return Databases.transaction(connection -> {
-            var jdbc = new CategoryDaoJdbc(connection);
+    public Optional<CategoryEntity> findCategoryByUsernameAndCategoryName(String username, String categoryName) throws Exception {
+        return jdbcTransactionTemplate.execute(() -> {
+            var jdbc = categoryDao;
             return jdbc.findCategoryByUsernameAndCategoryName(username, categoryName);
-        }, CFG.spendJdbcUrl(), null);
+        });
     }
 
-    public List<SpendEntity> findAllSpendsByUserName(String userName) throws SQLException {
-        return Databases.transaction(connection -> {
-            var jdbc = new SpendDaoJdbc(connection);
+    public List<SpendEntity> findAllSpendsByUserName(String userName) throws Exception {
+        return jdbcTransactionTemplate.execute(() -> {
+            var jdbc = spendDao;
             return jdbc.findSpendsByUsername(userName);
-        }, CFG.spendJdbcUrl(), null);
+        });
     }
 }

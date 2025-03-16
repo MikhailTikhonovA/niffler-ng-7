@@ -3,9 +3,11 @@ package student.data.dao.impl;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import student.config.Config;
 import student.data.dao.AuthDao;
 import student.data.entity.auth.AuthUserEntity;
 import student.data.mapper.AuthUserEntityRowMapper;
+import student.data.tmpl.Datasources;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
@@ -15,15 +17,11 @@ import java.util.UUID;
 
 public class AuthDaoSpringJdbc implements AuthDao {
 
-    private final DataSource datasource;
-
-    public AuthDaoSpringJdbc(DataSource datasource) {
-        this.datasource = datasource;
-    }
+    private static final Config CFG = Config.getInstance();
 
     @Override
     public AuthUserEntity createUser(AuthUserEntity user) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(Datasources.dataSource(CFG.authJdbcUrl()));
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
                     PreparedStatement preparedStatement = connection.prepareStatement(
@@ -47,7 +45,7 @@ public class AuthDaoSpringJdbc implements AuthDao {
 
     @Override
     public Optional<AuthUserEntity> findById(UUID id) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(Datasources.dataSource(CFG.authJdbcUrl()));
         return Optional.ofNullable(
                 jdbcTemplate.queryForObject(
                         "SELECT * FROM \"user\" WHERE id = ?",
@@ -59,7 +57,7 @@ public class AuthDaoSpringJdbc implements AuthDao {
 
     @Override
     public void deleteUser(AuthUserEntity user) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(datasource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(Datasources.dataSource(CFG.authJdbcUrl()));
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "delete from public.\"user\" where id = ?");

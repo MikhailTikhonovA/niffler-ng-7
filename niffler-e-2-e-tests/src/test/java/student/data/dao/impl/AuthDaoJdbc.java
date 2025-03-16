@@ -11,21 +11,16 @@ import java.sql.*;
 import java.util.Optional;
 import java.util.UUID;
 
+import static student.data.tmpl.Connections.holder;
+
 public class AuthDaoJdbc implements AuthDao {
 
     private static final PasswordEncoder PASSWORD_ENCODER = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
     private static final Config CFG = Config.getInstance();
-
-    private final Connection connection;
-
-    public AuthDaoJdbc(Connection connection) {
-        this.connection = connection;
-    }
-
     @Override
     public AuthUserEntity createUser(AuthUserEntity user) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.authJdbcUrl()).connection().prepareStatement(
                 "INSERT INTO public.\"user\" (username, \"password\", enabled, account_non_expired, account_non_locked, credentials_non_expired)"
                         + "VALUES (?,?,?,?,?,?)",
                 Statement.RETURN_GENERATED_KEYS
@@ -55,7 +50,7 @@ public class AuthDaoJdbc implements AuthDao {
 
     @Override
     public Optional<AuthUserEntity> findById(UUID id) {
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM \"user\" WHERE id = ?")) {
+        try (PreparedStatement ps = holder(CFG.authJdbcUrl()).connection().prepareStatement("SELECT * FROM \"user\" WHERE id = ?")) {
             ps.setObject(1, id);
             ps.execute();
             try (ResultSet rs = ps.getResultSet()) {
@@ -74,7 +69,7 @@ public class AuthDaoJdbc implements AuthDao {
 
     @Override
     public void deleteUser(AuthUserEntity user) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.authJdbcUrl()).connection().prepareStatement(
                 "delete from public.\"user\" where id = ?"
         )) {
             preparedStatement.setObject(1, user.getId());

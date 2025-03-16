@@ -10,19 +10,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static student.data.tmpl.Connections.holder;
+
 public class CategoryDaoJdbc implements CategoryDao {
 
     private static final Config CFG = Config.getInstance();
 
-    private final Connection connection;
-
-    public CategoryDaoJdbc(Connection connection) {
-        this.connection = connection;
-    }
-
     @Override
     public CategoryEntity createCategory(CategoryEntity category) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "INSERT INTO category (username, name, archived)"
                         + "VALUES (?,?,?)",
                 Statement.RETURN_GENERATED_KEYS
@@ -49,7 +45,7 @@ public class CategoryDaoJdbc implements CategoryDao {
 
     @Override
     public Optional<CategoryEntity> findByCategoryId(UUID id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "select * from category where id = ?",
                 Statement.RETURN_GENERATED_KEYS
         )) {
@@ -76,7 +72,7 @@ public class CategoryDaoJdbc implements CategoryDao {
 
     @Override
     public Optional<CategoryEntity> findCategoryByUsernameAndCategoryName(String username, String categoryName) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "select * from category where name = ? and username = ?",
                 Statement.RETURN_GENERATED_KEYS
         )) {
@@ -104,7 +100,7 @@ public class CategoryDaoJdbc implements CategoryDao {
 
     @Override
     public List<CategoryEntity> findCategoriesByUsername(String username) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "select * from category where username = ?",
                 Statement.RETURN_GENERATED_KEYS
         )) {
@@ -129,7 +125,7 @@ public class CategoryDaoJdbc implements CategoryDao {
 
     @Override
     public List<CategoryEntity> findAll() {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "select * from category",
                 Statement.RETURN_GENERATED_KEYS
         )) {
@@ -153,7 +149,7 @@ public class CategoryDaoJdbc implements CategoryDao {
 
     @Override
     public void deleteCategoryById(CategoryEntity category) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(
+        try (PreparedStatement preparedStatement = holder(CFG.spendJdbcUrl()).connection().prepareStatement(
                 "delete from category where id = ?"
         )) {
             preparedStatement.setObject(1, category.getId());
